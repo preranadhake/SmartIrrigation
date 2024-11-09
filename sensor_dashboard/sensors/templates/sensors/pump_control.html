@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pump Control</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f2f2f2;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .btn-on {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-off {
+            background-color: #28a745;
+            color: white;
+        }
+    </style>
+    <!-- CSRF Token Meta Tag -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
+</head>
+<body>
+    <div class="container my-5">
+        <h1 class="text-center mb-4">Pump Control</h1>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card p-4">
+                    <div class="card-body text-center">
+                        <h2>Pump is currently: 
+                            {% if is_pump_on %}
+                                <span class="text-danger">ON</span>
+                            {% else %}
+                                <span class="text-success">OFF</span>
+                            {% endif %}
+                        </h2>
+                        <button class="btn {% if is_pump_on %}btn-on{% else %}btn-off{% endif %} mt-3" 
+                                id="toggleButton" onclick="togglePump()">
+                            {% if is_pump_on %}
+                                Turn OFF Pump
+                            {% else %}
+                                Turn ON Pump
+                            {% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to get CSRF token from meta tag
+        function getCSRFToken() {
+            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        }
+
+        async function togglePump() {
+            const csrfToken = getCSRFToken();
+            const response = await fetch("{% url 'toggle_pump' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken // Send the CSRF token here
+                },
+                credentials: 'same-origin' // Ensures the CSRF token is sent with the request
+            });
+            const data = await response.json();
+            updatePumpState(data.is_pump_on);
+        }
+
+        function updatePumpState(isPumpOn) {
+            const statusText = document.querySelector("h2 span");
+            const button = document.getElementById("toggleButton");
+
+            if (isPumpOn) {
+                statusText.textContent = "ON";
+                statusText.classList.remove("text-success");
+                statusText.classList.add("text-danger");
+                button.classList.remove("btn-off");
+                button.classList.add("btn-on");
+                button.textContent = "Turn OFF Pump";
+            } else {
+                statusText.textContent = "OFF";
+                statusText.classList.remove("text-danger");
+                statusText.classList.add("text-success");
+                button.classList.remove("btn-on");
+                button.classList.add("btn-off");
+                button.textContent = "Turn ON Pump";
+            }
+        }
+    </script>
+</body>
+</html>
