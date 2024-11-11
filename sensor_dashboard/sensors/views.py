@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from .models import DHTData, SoilMoistureData, MotionData
 from django.utils import timezone
 from datetime import timedelta
+from django.views.decorators.csrf import csrf_exempt
 
 # Variable to simulate pump state
 pump_state = False  # False means off, True means on
@@ -26,19 +27,17 @@ def get_latest_sensor_data(request):
         'timestamps': [data.timestamp.strftime("%H:%M:%S") for data in dht_data]
     }
     return JsonResponse(response_data)
+    
+@csrf_exempt
 def toggle_pump(request):
-    # Toggle logic here, such as updating the pump status in the database
-    # For example, let's assume pump status is stored in SensorData model
-
-    # Fetch the latest sensor data or pump status model
-    sensor_data = sensor_data.objects.last()
-    if sensor_data:
-        # Toggle status, assuming `is_pump_on` is a boolean field in your model
-        sensor_data.is_pump_on = not sensor_data.is_pump_on
-        sensor_data.save()
-        return JsonResponse({'pump_status': sensor_data.is_pump_on})
+    global pump_state
+    if request.method == "POST":
+        # Toggle the pump state
+        pump_state = not pump_state
+        # Return the updated state as JSON
+        return JsonResponse({"is_pump_on": pump_state})
     else:
-        return JsonResponse({'error': 'Pump status not found'}, status=404)
+        return JsonResponse({"error": "Invalid request method"}, status=400)
 
 # Add the view for the pump control page
 def pump_control(request):
@@ -48,8 +47,8 @@ def pump_control(request):
 
 # A sample function to get the pump's current status (you can replace this with actual logic)
 def get_pump_status():
-    # Placeholder for actual logic to check pump status
-    return True  # Example: Assume the pump is on by default
+    # Return the current state of the pump as JSON
+    return JsonResponse({"is_pump_on": pump_state})
 
 def toggle_pump_logic():
     # This would contain the actual logic for turning the pump on/off

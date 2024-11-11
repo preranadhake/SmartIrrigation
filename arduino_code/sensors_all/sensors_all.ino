@@ -3,13 +3,11 @@
 #include <DHT.h>
 
 // Replace with your network credentials
-const char* ssid = "realme 11x 5G";
-const char* password = "tejas006";
+const char* ssid = "RedmiPower";
+const char* password = "Prerana123";
 
 // MQTT Broker details
 const char* mqtt_server = "broker.emqx.io";
-// const char* mqtt_user = "YOUR_MQTT_USERNAME";
-// const char* mqtt_password = "YOUR_MQTT_PASSWORD";
 
 // Define MQTT topics
 const char* tempHumTopic = "sensor/dht11";
@@ -30,9 +28,9 @@ PubSubClient client(espClient);
 unsigned long lastMsg = 0;
 const long interval = 2000;  // Publish interval in milliseconds
 
-// Calibration values
-const int sensorMin = 350;  // Minimum reading for 0% moisture (dry)
-const int sensorMax = 800;  // Maximum reading for 100% moisture (wet)
+// Calibration values for soil moisture
+int raw_min = 0;         // Update this with the reading from fully saturated soil
+int raw_max = 4095;      // Update this with the reading from completely dry soil
 
 // Function to connect to WiFi
 void setup_wifi() {
@@ -101,23 +99,18 @@ void loop() {
       Serial.println("Failed to read from DHT sensor!");
     }
 
-    // Read Soil Moisture data
-    int soilMoistureValue = analogRead(SOIL_MOISTURE_PIN);
-    String soilMoisturePayload = "{\"soil_moisture\": " + String(soilMoistureValue) + "}";
-    // Convert the reading to a percentage
-    // int moisturePercentage = map(soilMoistureValue, sensorMin, sensorMax, 100, 0);
-    // moisturePercentage = constrain(moisturePercentage, 0, 100);  // Ensure value is between 0 and 100
-    // char moistureString[8];
-    // itoa(moisturePercentage, moistureString, 10);
+    // Read and convert Soil Moisture data using new calibration
+    int raw_value = analogRead(SOIL_MOISTURE_PIN);
+    Serial.print("Raw Soil Moisture Value: ");
+    Serial.println(raw_value);
 
-    float soilMoisturePercentage = 100.0 * ((float)(sensorMax - soilMoistureValue) / (sensorMax - sensorMin));
-    soilMoisturePercentage = soilMoisturePercentage < 0 ? 0 : soilMoisturePercentage > 100 ? 100 : soilMoisturePercentage;
-    soilMoisturePayload = "{\"soil_moisture\": " + String(soilMoisturePercentage) + "}";
+    // Calculate soil moisture percentage
+    float soilMoisturePercentage = 100.0 * (raw_max - raw_value) / (raw_max - raw_min);
+    soilMoisturePercentage = constrain(soilMoisturePercentage, 0, 100);  // Constrain to 0-100%
 
-    
-
+    // Prepare payload and print for debugging
+    String soilMoisturePayload = "{\"soil_moisture\": \"" + String(soilMoisturePercentage) + "%\"}";
     client.publish(soilMoistureTopic, soilMoisturePayload.c_str());
-    // client.publish(soilMoistureTopic, moistureString);
     Serial.println("Soil Moisture Data Published: " + soilMoisturePayload);
 
     // Read PIR data
@@ -126,4 +119,5 @@ void loop() {
     client.publish(pirTopic, pirPayload.c_str());
     Serial.println("PIR Data Published: " + pirPayload);
   }
+
 }
