@@ -28,9 +28,9 @@ PubSubClient client(espClient);
 unsigned long lastMsg = 0;
 const long interval = 2000;  // Publish interval in milliseconds
 
-// Calibration values
-int sensorMin = 350;  // Update after reading from dry soil
-int sensorMax = 800;  // Update after reading from wet soil
+// Calibration values for soil moisture
+int raw_min = 0;         // Update this with the reading from fully saturated soil
+int raw_max = 4095;      // Update this with the reading from completely dry soil
 
 // Function to connect to WiFi
 void setup_wifi() {
@@ -99,16 +99,16 @@ void loop() {
       Serial.println("Failed to read from DHT sensor!");
     }
 
-    // Read Soil Moisture data
-    int soilMoistureValue = analogRead(SOIL_MOISTURE_PIN);
+    // Read and convert Soil Moisture data using new calibration
+    int raw_value = analogRead(SOIL_MOISTURE_PIN);
     Serial.print("Raw Soil Moisture Value: ");
-    Serial.println(soilMoistureValue);
+    Serial.println(raw_value);
 
-    // Convert the reading to a percentage
-    float soilMoisturePercentage = 100.0 * ((float)(sensorMax - soilMoistureValue) / (sensorMax - sensorMin));
-    soilMoisturePercentage = soilMoisturePercentage < 0 ? 0 : soilMoisturePercentage > 100 ? 100 : soilMoisturePercentage;
+    // Calculate soil moisture percentage
+    float soilMoisturePercentage = 100.0 * (raw_max - raw_value) / (raw_max - raw_min);
+    soilMoisturePercentage = constrain(soilMoisturePercentage, 0, 100);  // Constrain to 0-100%
 
-    // Prepare payload with percentage and print for debugging
+    // Prepare payload and print for debugging
     String soilMoisturePayload = "{\"soil_moisture\": \"" + String(soilMoisturePercentage) + "%\"}";
     client.publish(soilMoistureTopic, soilMoisturePayload.c_str());
     Serial.println("Soil Moisture Data Published: " + soilMoisturePayload);
