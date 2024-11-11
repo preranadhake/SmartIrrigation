@@ -28,7 +28,10 @@ class Command(BaseCommand):
             if topic == "sensor/dht11":
                 DHTData.objects.create(temperature=data["temperature"], humidity=data["humidity"])
             elif topic == "sensor/soil":
-                SoilMoistureData.objects.create(moisture_level=data["soil_moisture"])
+                # Process soil moisture value to remove the '%' sign and convert to float
+                soil_moisture_str = data["soil_moisture"]
+                moisture_level = float(soil_moisture_str.replace('%', '').strip())
+                SoilMoistureData.objects.create(moisture_level=moisture_level)
             elif topic == "sensor/pir":
                 MotionData.objects.create(motion_detected=bool(data["motion"]))
 
