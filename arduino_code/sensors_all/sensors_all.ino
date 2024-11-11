@@ -3,8 +3,8 @@
 #include <DHT.h>
 
 // Replace with your network credentials
-const char* ssid = "Redmi";
-const char* password = "Vedant123";
+const char* ssid = "RedmiPower";
+const char* password = "Prerana123";
 
 // MQTT Broker details
 const char* mqtt_server = "broker.emqx.io";
@@ -119,4 +119,5 @@ void loop() {
     client.publish(pirTopic, pirPayload.c_str());
     Serial.println("PIR Data Published: " + pirPayload);
   }
+
 }
