@@ -18,13 +18,21 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        .pump-button-on {
-            background-color: #28a745; /* Green */
+        .pump-indicator {
+            font-size: 1.2em;
+            font-weight: bold;
             color: white;
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+            text-align: center;
+            width: 100px;
         }
-        .pump-button-off {
+        .pump-on {
+            background-color: #28a745; /* Green */
+        }
+        .pump-off {
             background-color: #dc3545; /* Red */
-            color: white;
         }
     </style>
 </head>
@@ -58,8 +66,10 @@
         
         <!-- Pump ON/OFF Button -->
         <div class="text-center mb-4">
-            <button id="pumpButton" class="btn pump-button-off" onclick="togglePump()">Pump OFF</button>
-        </div>
+            <span id="pumpIndicator" class="pump-indicator {% if is_pump_on %}pump-on{% else %}pump-off{% endif %}">
+                {% if is_pump_on %}Pump ON{% else %}Pump OFF{% endif %}
+            </span>        </div>
+
         
         <div class="row">
             <div class="col-md-6 mb-4">
@@ -102,8 +112,7 @@
     <script>
         // Function to toggle pump state
         async function togglePump() {
-            const response = await fetch("{% url 'toggle_pump' %}", { method: 'POST' });
-            const data = await response.json();
+            
             updatePumpButton(data.is_pump_on);
         }
 
@@ -149,11 +158,28 @@
 
         // Function to fetch and update the current pump status
         async function fetchPumpStatus() {
-            const response = await fetch("{% url 'get_pump_status' %}");
-            const data = await response.json();
-            updatePumpButton(data.is_pump_on);
+        const response = await fetch("{% url 'get_pump_status' %}");
+        const data = await response.json();
+        updatePumpIndicator(data.is_pump_on);
+    }
+    function updatePumpStatus() {
+    $.get('/get_pump_status/', function(data) {
+        $('#pump-status').text(data.status);
+        if (data.status == 'ON') {
+            $('#pump-indicator').addClass('on');
+            $('#pump-indicator').removeClass('off');
+        } else {
+            $('#pump-indicator').addClass('off');
+            $('#pump-indicator').removeClass('on');
         }
+    });
+}
 
+    // Periodically check pump status every 5 seconds
+    setInterval(fetchPumpStatus, 5000);
+
+    // Fetch initial pump status on page load
+    fetchPumpStatus();
         // Initialize charts with configuration
         const chartOptions = {
             maintainAspectRatio: false,

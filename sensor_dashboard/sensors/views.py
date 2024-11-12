@@ -1,3 +1,4 @@
+
 from django.shortcuts import render
 from django.http import JsonResponse
 from .models import DHTData, SoilMoistureData, MotionData
@@ -41,14 +42,14 @@ def toggle_pump(request):
 
 # Add the view for the pump control page
 def pump_control(request):
-    # Here you can check the current state of the pump and pass it to the template
-    is_pump_on = get_pump_status()  # Assuming a function that gets the pump's state
+    # Get the current state of the pump and pass it to the template
+    is_pump_on = get_pump_status()  # Get the status of the pump
     return render(request, 'sensors/pump_control.html', {'is_pump_on': is_pump_on})
 
 # A sample function to get the pump's current status (you can replace this with actual logic)
 def get_pump_status():
-    # Return the current state of the pump as JSON
-    return JsonResponse({"is_pump_on": pump_state})
+    # Return the current state of the pump (True/False)
+    return pump_state  # Return the global pump_state variable
 
 def toggle_pump_logic():
     # This would contain the actual logic for turning the pump on/off
