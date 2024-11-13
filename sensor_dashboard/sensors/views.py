@@ -38,7 +38,7 @@ def dashboard(request):
         print("in if loop")
         print("pumpdata", pump_data.pumpStatus)
         pump_status = pump_data.pumpStatus  # Assuming status stores 'ON' or 'OFF'
-        return render(request, 'sensors/dashboard.html', {'pump_status': pump_status})
+        return render(request, 'sensors/sensor_dashboard.html', {'pump_status': pump_status})
 
 @csrf_exempt
 def toggle_pump(request):
