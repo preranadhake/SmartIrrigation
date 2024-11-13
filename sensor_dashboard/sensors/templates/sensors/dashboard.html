@@ -28,11 +28,13 @@
             text-align: center;
             width: 100px;
         }
-        .pump-on {
-            background-color: #28a745; /* Green */
+        .status-on {
+            color: green;
+            font-weight: bold;
         }
-        .pump-off {
-            background-color: #dc3545; /* Red */
+        .status-off {
+            color: red;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -63,14 +65,14 @@
 
     <div class="container my-5">
         <h1 class="text-center mb-4">Sensor Dashboard</h1>
-        
-        <!-- Pump ON/OFF Button -->
-        <div class="text-center mb-4">
-            <span id="pumpIndicator" class="pump-indicator {% if is_pump_on %}pump-on{% else %}pump-off{% endif %}">
-                {% if is_pump_on %}Pump ON{% else %}Pump OFF{% endif %}
-            </span>        </div>
 
-        
+            <h2>Pump Status: 
+                {% if pump_status == 'ON' %}
+                    <span class="status-on">Pump ON</span>
+                {% else %}
+                    <span class="status-off">Pump OFF</span>
+                {% endif %}
+            </h2>
         <div class="row">
             <div class="col-md-6 mb-4">
                 <div class="card">
@@ -112,7 +114,6 @@
     <script>
         // Function to toggle pump state
         async function togglePump() {
-            
             updatePumpButton(data.is_pump_on);
         }
 
@@ -163,20 +164,20 @@
         updatePumpIndicator(data.is_pump_on);
     }
     function updatePumpStatus() {
-    $.get('/get_pump_status/', function(data) {
-        $('#pump-status').text(data.status);
-        if (data.status == 'ON') {
-            $('#pump-indicator').addClass('on');
-            $('#pump-indicator').removeClass('off');
-        } else {
-            $('#pump-indicator').addClass('off');
-            $('#pump-indicator').removeClass('on');
-        }
-    });
+    fetch("{% url 'get_pump_status' %}")
+        .then(response => response.json())
+        .then(data => {
+            const statusElement = document.getElementById('pump-status');
+            if (data.pump_status === 'ON') {
+                statusElement.innerHTML = "<span style='color: green;'>Pump ON</span>";
+            } else {
+                statusElement.innerHTML = "<span style='color: red;'>Pump OFF</span>";
+            }
+        });
 }
 
     // Periodically check pump status every 5 seconds
-    setInterval(fetchPumpStatus, 5000);
+    setInterval(updatePumpStatus, 5000);
 
     // Fetch initial pump status on page load
     fetchPumpStatus();
@@ -220,10 +221,7 @@
         // Fetch data every 5 seconds
         setInterval(fetchDataAndUpdateCharts, 5000);
 
-        // Fetch initial pump status on page load
-        fetchPumpStatus();
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
