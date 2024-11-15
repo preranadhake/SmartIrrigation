@@ -135,52 +135,24 @@
         async function fetchDataAndUpdateCharts() {
             const response = await fetch("{% url 'get_latest_sensor_data' %}");
             const data = await response.json();
-
+    
             // Update charts with the new data
             temperatureChart.data.labels = data.timestamps;
             temperatureChart.data.datasets[0].data = data.temperature;
             temperatureChart.update();
-
+    
             humidityChart.data.labels = data.timestamps;
             humidityChart.data.datasets[0].data = data.humidity;
             humidityChart.update();
-
+    
             soilMoistureChart.data.labels = data.timestamps;
             soilMoistureChart.data.datasets[0].data = data.soil_moisture;
             soilMoistureChart.update();
-
+    
             motionChart.data.labels = data.timestamps;
             motionChart.data.datasets[0].data = data.motion;
             motionChart.update();
-
-            // Update pump button state
-            updatePumpButton(data.is_pump_on);
         }
-
-        // Function to fetch and update the current pump status
-        async function fetchPumpStatus() {
-        const response = await fetch("{% url 'get_pump_status' %}");
-        const data = await response.json();
-        updatePumpIndicator(data.is_pump_on);
-    }
-    function updatePumpStatus() {
-    fetch("{% url 'get_pump_status' %}")
-        .then(response => response.json())
-        .then(data => {
-            const statusElement = document.getElementById('pump-status');
-            if (data.pump_status === 'ON') {
-                statusElement.innerHTML = "<span style='color: green;'>Pump ON</span>";
-            } else {
-                statusElement.innerHTML = "<span style='color: red;'>Pump OFF</span>";
-            }
-        });
-}
-
-    // Periodically check pump status every 5 seconds
-    setInterval(updatePumpStatus, 5000);
-
-    // Fetch initial pump status on page load
-    fetchPumpStatus();
         // Initialize charts with configuration
         const chartOptions = {
             maintainAspectRatio: false,
@@ -220,6 +192,30 @@
 
         // Fetch data every 5 seconds
         setInterval(fetchDataAndUpdateCharts, 5000);
+        // Function to fetch and update the current pump status
+        async function fetchPumpStatus() {
+        const response = await fetch("{% url 'get_pump_status' %}");
+        const data = await response.json();
+        updatePumpIndicator(data.is_pump_on);
+    }
+    function updatePumpStatus() {
+    fetch("{% url 'get_pump_status' %}")
+        .then(response => response.json())
+        .then(data => {
+            const statusElement = document.getElementById('pump-status');
+            if (data.pump_status === 'ON') {
+                statusElement.innerHTML = "<span style='color: green;'>Pump ON</span>";
+            } else {
+                statusElement.innerHTML = "<span style='color: red;'>Pump OFF</span>";
+            }
+        });
+}
+
+    // Periodically check pump status every 5 seconds
+    setInterval(updatePumpStatus, 5000);
+
+    // Fetch initial pump status on page load
+    fetchPumpStatus();
 
     </script>
 

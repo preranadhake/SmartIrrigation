@@ -17,6 +17,8 @@ class MotionData(models.Model):
         return "Motion Detected" if self.motion_detected else "No Motion"
     
 class PumpData(models.Model):
-    # pumpStatus = models.CharField(max_length=10, choices=[("ON", "ON"), ("OFF", "OFF")])
-    pumpStatus = models.CharField(max_length=10)  # e.g., 'ON' or 'OFF'
+    # pumpStatus = models.CharField(max_length=10)  # e.g., 'ON' or 'OFF'
+    # timestamp = models.DateTimeField(auto_now_add=True)
+    
+    pumpStatus = models.BooleanField(default=False)  # Store as boolean (True for ON, False for OFF)
     timestamp = models.DateTimeField(auto_now_add=True)

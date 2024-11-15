@@ -12,7 +12,7 @@ pump_state = False  # False means off, True means on
 
 def get_latest_sensor_data(request):
     # Retrieve data from the last hour
-    one_hour_ago = timezone.now() - timedelta(hours=1)
+    one_hour_ago = timezone.now() - timedelta(hours=24)
     dht_data = DHTData.objects.filter(timestamp__gte=one_hour_ago).order_by('timestamp')
     soil_data = SoilMoistureData.objects.filter(timestamp__gte=one_hour_ago).order_by('timestamp')
     motion_data = MotionData.objects.filter(timestamp__gte=one_hour_ago).order_by('timestamp')
@@ -39,6 +39,30 @@ def dashboard(request):
         print("pumpdata", pump_data.pumpStatus)
         pump_status = pump_data.pumpStatus  # Assuming status stores 'ON' or 'OFF'
         return render(request, 'sensors/dashboard.html', {'pump_status': pump_status})
+
+# @csrf_exempt
+# def toggle_pump(request):
+#     global pump_state
+#     if request.method == "POST":
+#         # Toggle the pump state
+#         pump_state = not pump_state
+#         # Return the updated state as JSON
+#         return JsonResponse({"is_pump_on": pump_state})
+#     else:
+#         return JsonResponse({"error": "Invalid request method"}, status=400)
+# # View for the pump control page
+# def pump_control(request):
+#     latest_pump_data = PumpData.objects.last()
+#     is_pump_on = latest_pump_data and latest_pump_data.pumpStatus == 'ON'
+#     return render(request, 'sensors/pump_control.html', {'is_pump_on': is_pump_on})
+
+# # Fetch the latest pump status
+# def get_pump_status(request):
+#     latest_pump_data = PumpData.objects.last()
+#     pump_status = latest_pump_data.pumpStatus 
+#     pump_status = latest_pump_data.pumpStatus if latest_pump_data else 'OFF'
+#     return JsonResponse({'pump_status': pump_status})
+
 
 @csrf_exempt
 def toggle_pump(request):

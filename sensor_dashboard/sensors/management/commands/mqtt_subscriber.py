@@ -35,9 +35,9 @@ class Command(BaseCommand):
                 SoilMoistureData.objects.create(moisture_level=moisture_level)
             elif topic == "sensor/pir":
                 MotionData.objects.create(motion_detected=bool(data["motion"]))
-            elif topic == "sensor/pump_status":
-                PumpData.objects.create(pumpStatus=data["pumpStatus"])
-                print("Pump data saved")
+            # elif topic == "sensor/pump_status":
+            #     PumpData.objects.create(pumpStatus=data["pumpStatus"])
+            #     print("Pump data saved")
 
             print(f"Data saved from topic {topic}: {data}")
 
