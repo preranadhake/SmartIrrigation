@@ -28,45 +28,14 @@ def get_latest_sensor_data(request):
     return JsonResponse(response_data)
 
 def dashboard(request):
-   
-    # one_hour_ago = timezone.now() - timedelta(hours=1)
-    # pump_data = PumpData.objects.filter(timestamp__gte=one_hour_ago).order_by('timestamp')
-    pump_data = PumpData.objects.last() 
-    print("pumpdata", pump_data.pumpStatus) 
-    pump_status = 'OFF'  # Default status
-    if pump_data:
-        print("in if loop")
-        print("pumpdata", pump_data.pumpStatus)
-        pump_status = pump_data.pumpStatus  # Assuming status stores 'ON' or 'OFF'
-        return render(request, 'sensors/sensor_dashboard.html', {'pump_status': pump_status})
+    return render(request, 'sensors/sensor_dashboard.html')
 
-@csrf_exempt
-def toggle_pump(request):
-
-    global pump_state
-    if request.method == "POST":
-        # Toggle the pump state
-        pump_state = not pump_state
-        # Return the updated state as JSON
-        return JsonResponse({"is_pump_on": pump_state})
-    else:
-        return JsonResponse({"error": "Invalid request method"}, status=400)
-
-# Add the view for the pump control page
-def pump_control(request):
-    # Get the current state of the pump and pass it to the template
-    is_pump_on = get_pump_status()  # Get the status of the pump
-    return render(request, 'sensors/pump_control.html', {'is_pump_on': is_pump_on})
-
-# A sample function to get the pump's current status (you can replace this with actual logic)
-def get_pump_status():
+def get_pump_status(request):
     pump_data = PumpData.objects.last()
     pump_status = pump_data.pumpStatus if pump_data else 'OFF'
     return JsonResponse({'pump_status': pump_status})
 
-def toggle_pump_logic():
-    # This would contain the actual logic for turning the pump on/off
-    # For simulation, we'll toggle the state and return it
-    # For example, this could interact with an ESP32 to control the relay
-    # You can change this logic as per your actual implementation
-    return True  # Just returning True as a placeholder
+
+
+
+
